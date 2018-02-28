@@ -22,7 +22,7 @@ option_list = list(
 ###epilogue for options
 epilogue<-"Available annotations:
 hg19
-
+mm10
 
 **Acceptable values for gene ids:
 refseq_id \t Refseq transcript id(s) ex. NM_001271017
@@ -30,6 +30,7 @@ ensembl_gene_id \t Ensembl gene id(s) ex. ENSG00000000003
 ensembl_transcript_id \t Ensembl transcript id(s) ex.ENST00000000233
 ensembl_transcript_id_version \t Ensembl transcript id(s) versioned ex. ENST00000000233.1 
 ucsc_id \t  UCSC id(s) ex.  uc007aet.1
+mgi_id \t MGI id(s) ex. MGI:96285 
 "
 
 usage<-":ID_conversion.R -f genes.txt -a hg19 -I ensembl_gene_id  -o converted_gene_ids.txt"
@@ -75,15 +76,15 @@ warning("NAs were found in input gene list. NAs will be removed")
 
 ids<-dat$V1[!is.na(dat$V1)]
 
-####check that values of annotation, from and two are acceptable
+####check that values of annotation, from are acceptable
 
 ##
 annot<-opt$annotation
 
-valid_annot<-c("hg19")
+valid_annot<-c("hg19","mm10")
 
 if (!opt$annotation %in% valid_annot) {
-  stop("Annotation is not currently available. Available annotatations are: hg19")
+  stop("Annotation is not currently available. Available annotatations are: hg19 and mm10")
 }
 
 annot<-opt$annotation
@@ -92,22 +93,29 @@ annot<-opt$annotation
   lookup_file<-read.delim(lookup_file_path,header=T)
 
 ###check if from and to values are valid
-valid_ids<-c("refseq_id","ensembl_transcript_id_version","ensembl_transcript_id","ensembl_gene_id","ucsc_id")
+valid_ids<-c("refseq_id","ensembl_transcript_id_version","ensembl_transcript_id","ensembl_gene_id","ucsc_id","mgi_id")
 if (!opt$inputIDs %in% valid_ids) {
 stop("Input id type is not valid. Please see help to find list of valid gene ids.")
 }
 
+###check that if mgi ids are the input id, that mm10 is the annotation
+if (opt$inputIDs=="mgi_id" & opt$annotation != "mm10") {
+stop("mgi ids are only available for mm10 annotation")
+}
+
+
 
 if (opt$inputIDs=="refseq_id") {
   cols<-c("refseq_id","refseq_gene_symbol","description")
-} else if (opt$inputIDs %in% c("ensembl_transcript_id_versioned","ensembl_transcript_id","ensembl_gene_id")) {
+} else if (opt$inputIDs %in% c("ensembl_transcript_id_versioned","ensembl_transcript_id","ensembl_gene_id","ucsc_id")) {
   cols<-c(opt$inputIDs,"ensembl_gene_symbol","description")
-} else {
-  cols<-c(opt$inputIDs,"ensembl_gene_symbol","description")
+} else if (opt$inputIDs=="mgi_id") {
+  cols<-c(opt$inputIDs,"mgi_symbol","description")
 }
 
 lookup_col<-lookup_file[,opt$inputIDs]
 conversion<-lookup_file[match(ids,lookup_col),cols]
 colnames(conversion)[2]<-"gene_symbol"
+
 ##change gene symbol colname?
 write.table(conversion,file=opt$out,sep="\t",row.names=FALSE,quote=FALSE)
