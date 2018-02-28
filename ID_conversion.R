@@ -22,6 +22,7 @@ option_list = list(
 ###epilogue for options
 epilogue<-"Available annotations:
 hg19
+hg38
 mm10
 
 **Acceptable values for gene ids:
@@ -81,10 +82,10 @@ ids<-dat$V1[!is.na(dat$V1)]
 ##
 annot<-opt$annotation
 
-valid_annot<-c("hg19","mm10")
+valid_annot<-c("hg19","mm10","hg38")
 
 if (!opt$annotation %in% valid_annot) {
-  stop("Annotation is not currently available. Available annotatations are: hg19 and mm10")
+  stop("Annotation is not currently available. Available annotatations are: hg19,hg38 and mm10")
 }
 
 annot<-opt$annotation
