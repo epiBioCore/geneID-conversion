@@ -94,6 +94,7 @@ annot<-opt$annotation
 
 ###check if from and to values are valid
 valid_ids<-c("refseq_id","ensembl_transcript_id_version","ensembl_transcript_id","ensembl_gene_id","ucsc_id","mgi_id")
+
 if (!opt$inputIDs %in% valid_ids) {
 stop("Input id type is not valid. Please see help to find list of valid gene ids.")
 }
